@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "cth/l3bS0aA=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Api\\MeetingRoomBooking.Api.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.14\\microsoft.aspnetcore.openapi.10.0.14.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.openapi\\2.12.2\\microsoft.openapi.2.12.2.nupkg.sha512"
+  ],
+  "logs": []
+}
