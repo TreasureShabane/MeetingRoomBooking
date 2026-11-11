@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MeetingRoomBooking.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c8eb589d110182c918f234057cdaba5dfe1c6801")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5e609ace75cc9b35a780508cd0b03564f35f548e")]
 [assembly: System.Reflection.AssemblyProductAttribute("MeetingRoomBooking.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MeetingRoomBooking.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -974,11 +974,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Tests\\MeetingRoomBooking.Tests.csproj",
+      "projectUniqueName": "C:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Tests\\MeetingRoomBooking.Tests.csproj",
       "projectName": "MeetingRoomBooking.Tests",
-      "projectPath": "c:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Tests\\MeetingRoomBooking.Tests.csproj",
+      "projectPath": "C:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Tests\\MeetingRoomBooking.Tests.csproj",
       "packagesPath": "C:\\Users\\treasureshabane\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Tests\\obj\\",
+      "outputPath": "C:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Tests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
