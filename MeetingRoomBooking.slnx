@@ -1,3 +1,6 @@
 <Solution>
   <Project Path="MeetingRoomBooking.Api/MeetingRoomBooking.Api.csproj" />
+  <Project Path="MeetingRoomBooking.Application/MeetingRoomBooking.Application.csproj" />
+  <Project Path="MeetingRoomBooking.Domain/MeetingRoomBooking.Domain.csproj" />
+  <Project Path="MeetingRoomBooking.Infrastructure/MeetingRoomBooking.Infrastructure.csproj" />
 </Solution>

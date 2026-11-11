@@ -1,0 +1,16 @@
+c:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\bin\Debug\net10.0\MeetingRoomBooking.Application.deps.json
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\bin\Debug\net10.0\MeetingRoomBooking.Application.dll
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\bin\Debug\net10.0\MeetingRoomBooking.Application.pdb
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\bin\Debug\net10.0\MeetingRoomBooking.Domain.dll
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\bin\Debug\net10.0\MeetingRoomBooking.Domain.pdb
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\MeetingRoomBooking.Application.csproj.AssemblyReference.cache
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\MeetingRoomBooking.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\MeetingRoomBooking.Application.AssemblyInfoInputs.cache
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\MeetingRoomBooking.Application.AssemblyInfo.cs
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\MeetingRoomBooking.Application.csproj.CoreCompileInputs.cache
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\MeetingRoomBooking.Application.sourcelink.json
+c:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\MeetingR.276BD7F4.Up2Date
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\MeetingRoomBooking.Application.dll
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\refint\MeetingRoomBooking.Application.dll
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\MeetingRoomBooking.Application.pdb
+c:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Application\obj\Debug\net10.0\ref\MeetingRoomBooking.Application.dll

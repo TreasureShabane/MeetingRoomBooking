@@ -36,6 +36,43 @@
             "related": ".pdb;.xml"
           }
         }
+      },
+      "MeetingRoomBooking.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "MeetingRoomBooking.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/MeetingRoomBooking.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MeetingRoomBooking.Application.dll": {}
+        }
+      },
+      "MeetingRoomBooking.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "compile": {
+          "bin/placeholder/MeetingRoomBooking.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MeetingRoomBooking.Domain.dll": {}
+        }
+      },
+      "MeetingRoomBooking.Infrastructure/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "MeetingRoomBooking.Application": "1.0.0",
+          "MeetingRoomBooking.Domain": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/MeetingRoomBooking.Infrastructure.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/MeetingRoomBooking.Infrastructure.dll": {}
+        }
       }
     }
   },
@@ -75,10 +112,27 @@
         "microsoft.openapi.2.12.2.nupkg.sha512",
         "microsoft.openapi.nuspec"
       ]
+    },
+    "MeetingRoomBooking.Application/1.0.0": {
+      "type": "project",
+      "path": "../MeetingRoomBooking.Application/MeetingRoomBooking.Application.csproj",
+      "msbuildProject": "../MeetingRoomBooking.Application/MeetingRoomBooking.Application.csproj"
+    },
+    "MeetingRoomBooking.Domain/1.0.0": {
+      "type": "project",
+      "path": "../MeetingRoomBooking.Domain/MeetingRoomBooking.Domain.csproj",
+      "msbuildProject": "../MeetingRoomBooking.Domain/MeetingRoomBooking.Domain.csproj"
+    },
+    "MeetingRoomBooking.Infrastructure/1.0.0": {
+      "type": "project",
+      "path": "../MeetingRoomBooking.Infrastructure/MeetingRoomBooking.Infrastructure.csproj",
+      "msbuildProject": "../MeetingRoomBooking.Infrastructure/MeetingRoomBooking.Infrastructure.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "MeetingRoomBooking.Application >= 1.0.0",
+      "MeetingRoomBooking.Infrastructure >= 1.0.0",
       "Microsoft.AspNetCore.OpenApi >= 10.0.14"
     ]
   },
@@ -115,7 +169,14 @@
         "net10.0": {
           "framework": "net10.0",
           "targetAlias": "net10.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Application\\MeetingRoomBooking.Application.csproj": {
+              "projectPath": "C:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Application\\MeetingRoomBooking.Application.csproj"
+            },
+            "C:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Infrastructure\\MeetingRoomBooking.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Infrastructure\\MeetingRoomBooking.Infrastructure.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
