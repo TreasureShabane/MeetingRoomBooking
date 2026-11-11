@@ -3,4 +3,5 @@
   <Project Path="MeetingRoomBooking.Application/MeetingRoomBooking.Application.csproj" />
   <Project Path="MeetingRoomBooking.Domain/MeetingRoomBooking.Domain.csproj" />
   <Project Path="MeetingRoomBooking.Infrastructure/MeetingRoomBooking.Infrastructure.csproj" />
+  <Project Path="MeetingRoomBooking.Tests/MeetingRoomBooking.Tests.csproj" />
 </Solution>

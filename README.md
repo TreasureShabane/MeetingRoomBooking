@@ -24,6 +24,8 @@ This keeps the API thin, makes validation logic reusable, and allows the data so
 
 ## API Endpoints
 
+The API exposes OpenAPI metadata and can be explored at `/openapi/v1.json` while the app is running.
+
 ### Rooms
 
 - `GET /api/rooms` – list all rooms
@@ -77,8 +79,14 @@ dotnet restore
 dotnet run --project MeetingRoomBooking.Api
 ```
 
-4. Open the API in a browser or use HTTP tooling to call the endpoints.
+4. Open the API documentation in a browser via the generated OpenAPI endpoint, or call the API using HTTP tooling.
+
+## Running the Tests
+
+```bash
+dotnet test MeetingRoomBooking.slnx --nologo
+```
 
 ## Notes
 
-This repository currently focuses on the backend API for the booking workflow, in line with the assessment requirements. The frontend layer is intentionally not included in this iteration so the API remains independent and reusable for other clients.
+This repository currently focuses on the backend API for the booking workflow, in line with the assessment requirements. The frontend layer is intentionally not included in this iteration so the API remains independent, testable, and reusable for a future Vue client.
