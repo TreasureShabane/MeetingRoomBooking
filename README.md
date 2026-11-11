@@ -14,6 +14,7 @@ A full-stack meeting room booking application with a Vue 3 client and an ASP.NET
 ## Features
 
 - Lists seeded meeting rooms and existing bookings from the API.
+- Starts on an overview screen, with separate booking, schedule, and meeting-room screens.
 - Creates and edits bookings with frontend and backend validation.
 - Prevents overlapping bookings for the same room.
 - Cancels bookings with a confirmation and success message.

@@ -1,23 +1,33 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import BookingDialog from './components/BookingDialog.vue'
+import BookingForm from './components/BookingForm.vue'
 import { useBookingStore } from './stores/bookingStore'
 import type { Booking, CreateBookingInput } from './types/booking'
+
+type Screen = 'overview' | 'bookings' | 'rooms' | 'booking'
 
 const store = useBookingStore()
 const { bookings, rooms, isLoading } = storeToRefs(store)
 const selectedDate = ref(toDateInputValue(new Date()))
 const searchQuery = ref('')
 const capacityFilter = ref('any')
-const showBookingDialog = ref(false)
-const activeNav = ref('Overview')
+const activeScreen = ref<Screen>('overview')
+const returnScreen = ref<Exclude<Screen, 'booking'>>('overview')
 const editingBooking = ref<Booking | null>(null)
 const bookingRoomId = ref('')
 const dialogError = ref('')
 const loadError = ref('')
 const notice = ref<{ kind: 'success' | 'error'; message: string } | null>(null)
 let noticeTimeout: number | undefined
+const activeNav = computed(() => {
+  if (activeScreen.value === 'booking') {
+    return 'Book a room'
+  }
+  return activeScreen.value === 'rooms'
+    ? 'Meeting rooms'
+    : activeScreen.value.charAt(0).toUpperCase() + activeScreen.value.slice(1)
+})
 
 const filteredRooms = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -102,24 +112,30 @@ function roomBookingCount(roomId: string): number {
   return todaysBookings.value.filter((booking) => booking.roomId === roomId).length
 }
 
-function openBookingDialog(roomId = rooms.value[0]?.id ?? ''): void {
+function openBookingScreen(roomId = rooms.value[0]?.id ?? ''): void {
+  if (activeScreen.value !== 'booking') {
+    returnScreen.value = activeScreen.value
+  }
   editingBooking.value = null
   bookingRoomId.value = roomId
   dialogError.value = ''
   dismissNotice()
-  showBookingDialog.value = true
+  activeScreen.value = 'booking'
+  window.scrollTo({ top: 0 })
 }
 
-function openEditDialog(booking: Booking): void {
+function openEditScreen(booking: Booking): void {
+  returnScreen.value = 'bookings'
   editingBooking.value = booking
   bookingRoomId.value = booking.roomId
   dialogError.value = ''
   dismissNotice()
-  showBookingDialog.value = true
+  activeScreen.value = 'booking'
+  window.scrollTo({ top: 0 })
 }
 
-function closeBookingDialog(): void {
-  showBookingDialog.value = false
+function closeBookingScreen(): void {
+  activeScreen.value = returnScreen.value
   editingBooking.value = null
 }
 
@@ -135,7 +151,8 @@ async function saveBooking(input: CreateBookingInput): Promise<void> {
     }
 
     selectedDate.value = input.date
-    closeBookingDialog()
+    activeScreen.value = 'bookings'
+    editingBooking.value = null
   } catch (error) {
     dialogError.value = getErrorMessage(error)
     showNotice('error', dialogError.value)
@@ -156,13 +173,27 @@ async function cancelBooking(booking: Booking): Promise<void> {
 }
 
 function navigateTo(item: string): void {
-  activeNav.value = item
-  const targetId = item === 'Bookings' ? 'bookings-section' : 'rooms-section'
-  if (item === 'Overview') {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  } else {
-    document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' })
+  activeScreen.value = item === 'Meeting rooms'
+    ? 'rooms'
+    : item === 'Bookings'
+      ? 'bookings'
+      : 'overview'
+  editingBooking.value = null
+  dismissNotice()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function isNavigationActive(item: string): boolean {
+  if (activeScreen.value === 'booking') {
+    return (returnScreen.value === 'rooms' && item === 'Meeting rooms') ||
+      (returnScreen.value === 'bookings' && item === 'Bookings') ||
+      (returnScreen.value === 'overview' && item === 'Overview')
   }
+  return (
+    (activeScreen.value === 'overview' && item === 'Overview') ||
+    (activeScreen.value === 'bookings' && item === 'Bookings') ||
+    (activeScreen.value === 'rooms' && item === 'Meeting rooms')
+  )
 }
 
 async function retryLoading(): Promise<void> {
@@ -194,7 +225,7 @@ async function retryLoading(): Promise<void> {
           v-for="item in ['Overview', 'Bookings', 'Meeting rooms']"
           :key="item"
           class="nav-item"
-          :class="{ 'nav-item-active': activeNav === item }"
+          :class="{ 'nav-item-active': isNavigationActive(item) }"
           type="button"
           @click="navigateTo(item)"
         >
@@ -242,13 +273,13 @@ async function retryLoading(): Promise<void> {
       </header>
 
       <div class="page-content">
-        <section class="welcome-row">
+        <section v-if="activeScreen === 'overview'" class="welcome-row">
           <div>
             <p class="eyebrow">YOUR WORKPLACE, MADE SIMPLE</p>
             <h1>Make room for good ideas <span aria-hidden="true">✦</span></h1>
             <p class="welcome-subtitle">Find a space and bring your people together.</p>
           </div>
-          <button class="button button-primary" type="button" :disabled="!rooms.length" @click="openBookingDialog()">
+          <button class="button button-primary" type="button" :disabled="!rooms.length" @click="openBookingScreen()">
             <span class="button-plus" aria-hidden="true">+</span> Book a room
           </button>
         </section>
@@ -271,12 +302,12 @@ async function retryLoading(): Promise<void> {
           <button type="button" @click="retryLoading">Try again</button>
         </div>
 
-        <section class="hero-card" aria-label="Meeting room booking">
+        <section v-if="activeScreen === 'overview'" class="hero-card" aria-label="Meeting room booking">
           <div class="hero-content">
             <span class="hero-kicker"><span class="sparkle" aria-hidden="true">✳</span> MAKE TODAY A GOOD MEETING</span>
             <h2>A little space<br />for big ideas.</h2>
             <p>Find a room that gives your team space to think.</p>
-            <button class="hero-link" type="button" :disabled="!rooms.length" @click="openBookingDialog()">
+            <button class="hero-link" type="button" @click="navigateTo('Meeting rooms')">
               Find your room <span aria-hidden="true">→</span>
             </button>
           </div>
@@ -291,7 +322,7 @@ async function retryLoading(): Promise<void> {
           <div class="hero-note"><span>✦</span> Good ideas grow together</div>
         </section>
 
-        <section class="overview-strip" aria-label="Booking overview">
+        <section v-if="activeScreen === 'overview'" class="overview-strip" aria-label="Booking overview">
           <div class="overview-date">
             <div class="calendar-icon" aria-hidden="true">
               <span>{{ new Intl.DateTimeFormat('en', { month: 'short' }).format(new Date(`${selectedDate}T12:00:00`)) }}</span>
@@ -307,13 +338,26 @@ async function retryLoading(): Promise<void> {
             <span class="stat-icon stat-icon-peach" aria-hidden="true">▦</span>
             <div><strong>{{ todaysBookings.length }}</strong><span>bookings on this day</span></div>
           </div>
-          <button class="overview-arrow" type="button" aria-label="Book a room" :disabled="!rooms.length" @click="openBookingDialog()">→</button>
+          <button class="overview-arrow" type="button" aria-label="Book a room" :disabled="!rooms.length" @click="openBookingScreen()">→</button>
         </section>
 
-        <section id="rooms-section" class="rooms-section">
+        <section v-if="activeScreen === 'overview'" class="overview-shortcuts" aria-label="Workspace shortcuts">
+          <button type="button" @click="navigateTo('Bookings')">
+            <span class="shortcut-icon" aria-hidden="true">▦</span>
+            <span><strong>View bookings</strong><small>See the room schedule</small></span>
+            <span class="shortcut-arrow" aria-hidden="true">→</span>
+          </button>
+          <button type="button" @click="navigateTo('Meeting rooms')">
+            <span class="shortcut-icon" aria-hidden="true">⌂</span>
+            <span><strong>Explore meeting rooms</strong><small>Find a space for your team</small></span>
+            <span class="shortcut-arrow" aria-hidden="true">→</span>
+          </button>
+        </section>
+
+        <section v-if="activeScreen === 'rooms'" class="rooms-section">
           <div class="section-heading">
             <div>
-              <div class="section-title-row"><h2>Find your space</h2><span class="room-count">{{ filteredRooms.length }} rooms</span></div>
+              <div class="section-title-row"><h1>Meeting rooms</h1><span class="room-count">{{ filteredRooms.length }} rooms</span></div>
               <p>Choose a room with the capacity you need.</p>
             </div>
             <div class="date-control">
@@ -360,7 +404,7 @@ async function retryLoading(): Promise<void> {
                 <div class="room-card-title"><h3>{{ room.name }}</h3><span class="room-status"><span></span> Bookable</span></div>
                 <p class="room-description">A meeting space for up to {{ room.capacity }} people.</p>
                 <div class="amenity-list"><span>Capacity {{ room.capacity }}</span></div>
-                <button class="room-book-button" type="button" @click="openBookingDialog(room.id)">
+                <button class="room-book-button" type="button" @click="openBookingScreen(room.id)">
                   Book this room <span aria-hidden="true">→</span>
                 </button>
               </div>
@@ -374,9 +418,22 @@ async function retryLoading(): Promise<void> {
           </div>
         </section>
 
-        <section id="bookings-section" class="schedule-section">
+        <section v-if="activeScreen === 'bookings'" class="schedule-section">
           <div class="section-heading schedule-heading">
-            <div><h2>Room schedule</h2><p>Bookings for {{ formatShortDate(selectedDate) }}.</p></div>
+            <div><h1>Bookings</h1><p>Room schedule for {{ formatShortDate(selectedDate) }}.</p></div>
+            <div class="schedule-tools">
+              <div class="date-control">
+                <button type="button" aria-label="Previous day" @click="changeDate(-1)">‹</button>
+                <label>
+                  <span class="sr-only">Booking date</span>
+                  <input v-model="selectedDate" type="date" />
+                </label>
+                <button type="button" aria-label="Next day" @click="changeDate(1)">›</button>
+              </div>
+              <button class="button button-primary" type="button" :disabled="!rooms.length" @click="openBookingScreen()">
+                <span class="button-plus" aria-hidden="true">+</span> Book a room
+              </button>
+            </div>
           </div>
           <div v-if="todaysBookings.length" class="schedule-list">
             <article v-for="booking in todaysBookings" :key="booking.id" class="schedule-item">
@@ -386,7 +443,7 @@ async function retryLoading(): Promise<void> {
                 <div><h3>{{ booking.title }}</h3><span class="schedule-room">{{ booking.roomName }}</span></div>
                 <span class="booking-confirmed"><span></span> Confirmed</span>
                 <div class="booking-actions">
-                  <button class="edit-button" type="button" @click="openEditDialog(booking)">Edit</button>
+                  <button class="edit-button" type="button" @click="openEditScreen(booking)">Edit</button>
                   <button class="cancel-button" type="button" @click="cancelBooking(booking)">Cancel</button>
                 </div>
               </div>
@@ -395,22 +452,21 @@ async function retryLoading(): Promise<void> {
           <div v-else class="schedule-empty">
             <span class="schedule-empty-icon" aria-hidden="true">☀</span>
             <div><strong>A clear day is a good day.</strong><p>No bookings for {{ formatShortDate(selectedDate) }} yet.</p></div>
-            <button class="text-button" type="button" :disabled="!rooms.length" @click="openBookingDialog()">Plan a meeting <span aria-hidden="true">→</span></button>
+            <button class="text-button" type="button" :disabled="!rooms.length" @click="openBookingScreen()">Plan a meeting <span aria-hidden="true">→</span></button>
           </div>
         </section>
+        <BookingForm
+          v-if="activeScreen === 'booking'"
+          :rooms="rooms"
+          :initial-date="selectedDate"
+          :initial-room-id="bookingRoomId"
+          :booking="editingBooking"
+          :submission-error="dialogError"
+          @close="closeBookingScreen"
+          @book="saveBooking"
+        />
         <footer class="page-footer"><span>Made for better workdays.</span><span>Need support? <a href="mailto:workplace@example.com">Get in touch</a></span></footer>
       </div>
     </main>
-
-    <BookingDialog
-      v-if="showBookingDialog"
-      :rooms="rooms"
-      :initial-date="selectedDate"
-      :initial-room-id="bookingRoomId"
-      :booking="editingBooking"
-      :submission-error="dialogError"
-      @close="closeBookingDialog"
-      @book="saveBooking"
-    />
   </div>
 </template>
