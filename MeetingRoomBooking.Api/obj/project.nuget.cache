@@ -1,11 +1,24 @@
 {
   "version": 2,
-  "dgSpecHash": "fuR0IH4pE04=",
+  "dgSpecHash": "Pd7Ut4mjT6o=",
   "success": true,
   "projectFilePath": "C:\\Users\\treasureshabane\\source\\repos\\MeetingRoomBooking\\MeetingRoomBooking.Api\\MeetingRoomBooking.Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.14\\microsoft.aspnetcore.openapi.10.0.14.nupkg.sha512",
-    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.openapi\\2.12.2\\microsoft.openapi.2.12.2.nupkg.sha512"
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.data.sqlite.core\\10.0.14\\microsoft.data.sqlite.core.10.0.14.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.entityframeworkcore\\10.0.14\\microsoft.entityframeworkcore.10.0.14.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\10.0.14\\microsoft.entityframeworkcore.abstractions.10.0.14.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\10.0.14\\microsoft.entityframeworkcore.analyzers.10.0.14.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\10.0.14\\microsoft.entityframeworkcore.relational.10.0.14.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.entityframeworkcore.sqlite\\10.0.14\\microsoft.entityframeworkcore.sqlite.10.0.14.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.entityframeworkcore.sqlite.core\\10.0.14\\microsoft.entityframeworkcore.sqlite.core.10.0.14.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.extensions.dependencymodel\\10.0.14\\microsoft.extensions.dependencymodel.10.0.14.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\microsoft.openapi\\2.12.2\\microsoft.openapi.2.12.2.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\scalar.aspnetcore\\2.20.0\\scalar.aspnetcore.2.20.0.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\2.1.13\\sqlitepclraw.bundle_e_sqlite3.2.1.13.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\sqlitepclraw.core\\2.1.13\\sqlitepclraw.core.2.1.13.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\sqlitepclraw.lib.e_sqlite3\\2.1.13\\sqlitepclraw.lib.e_sqlite3.2.1.13.nupkg.sha512",
+    "C:\\Users\\treasureshabane\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\2.1.13\\sqlitepclraw.provider.e_sqlite3.2.1.13.nupkg.sha512"
   ],
   "logs": []
 }
