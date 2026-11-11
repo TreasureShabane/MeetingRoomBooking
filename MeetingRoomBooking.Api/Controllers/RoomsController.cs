@@ -15,16 +15,21 @@ public sealed class RoomsController : ControllerBase
         _meetingRoomService = meetingRoomService;
     }
 
+    /// <summary>Lists the meeting rooms available for booking.</summary>
     [HttpGet]
-    public ActionResult<IReadOnlyCollection<MeetingRoomDto>> GetAll()
+    [ProducesResponseType(typeof(IReadOnlyCollection<MeetingRoomDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyCollection<MeetingRoomDto>>> GetAll(CancellationToken cancellationToken)
     {
-        return Ok(_meetingRoomService.GetAllRooms());
+        return Ok(await _meetingRoomService.GetAllRoomsAsync(cancellationToken));
     }
 
+    /// <summary>Returns a meeting room by its identifier.</summary>
     [HttpGet("{id:guid}")]
-    public ActionResult<MeetingRoomDto> GetById(Guid id)
+    [ProducesResponseType(typeof(MeetingRoomDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<MeetingRoomDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var room = _meetingRoomService.GetRoom(id);
+        var room = await _meetingRoomService.GetRoomAsync(id, cancellationToken);
         if (room is null)
         {
             return NotFound();

@@ -6,20 +6,17 @@ namespace MeetingRoomBooking.Infrastructure.Repositories;
 
 public sealed class InMemoryMeetingRoomRepository : IMeetingRoomRepository
 {
-    private readonly List<MeetingRoom> _rooms;
+    private readonly List<MeetingRoom> _rooms = SeedData.Rooms.ToList();
 
-    public InMemoryMeetingRoomRepository()
+    public Task<IReadOnlyCollection<MeetingRoom>> GetAllAsync(CancellationToken cancellationToken)
     {
-        _rooms = SeedData.Rooms.ToList();
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult<IReadOnlyCollection<MeetingRoom>>(_rooms.AsReadOnly());
     }
 
-    public IReadOnlyCollection<MeetingRoom> GetAll()
+    public Task<MeetingRoom?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return _rooms.AsReadOnly();
-    }
-
-    public MeetingRoom? GetById(Guid id)
-    {
-        return _rooms.FirstOrDefault(room => room.Id == id);
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(_rooms.FirstOrDefault(room => room.Id == id));
     }
 }

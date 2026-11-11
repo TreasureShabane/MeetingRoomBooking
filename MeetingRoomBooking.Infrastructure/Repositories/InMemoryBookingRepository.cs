@@ -6,31 +6,64 @@ namespace MeetingRoomBooking.Infrastructure.Repositories;
 
 public sealed class InMemoryBookingRepository : IBookingRepository
 {
-    private readonly List<Booking> _bookings;
+    private readonly List<Booking> _bookings = SeedData.Bookings.ToList();
 
-    public InMemoryBookingRepository()
+    public Task<IReadOnlyCollection<Booking>> GetAllAsync(CancellationToken cancellationToken)
     {
-        _bookings = SeedData.Bookings.ToList();
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult<IReadOnlyCollection<Booking>>(_bookings.AsReadOnly());
     }
 
-    public IReadOnlyCollection<Booking> GetAll()
+    public Task<Booking?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return _bookings.AsReadOnly();
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(_bookings.FirstOrDefault(booking => booking.Id == id));
     }
 
-    public Booking? GetById(Guid id)
+    public Task<bool> HasOverlapAsync(
+        Guid roomId,
+        DateTimeOffset start,
+        DateTimeOffset end,
+        Guid? excludedBookingId,
+        CancellationToken cancellationToken)
     {
-        return _bookings.FirstOrDefault(booking => booking.Id == id);
+        cancellationToken.ThrowIfCancellationRequested();
+        var hasOverlap = _bookings.Any(booking =>
+            booking.RoomId == roomId &&
+            booking.Id != excludedBookingId &&
+            start < booking.End &&
+            booking.Start < end);
+
+        return Task.FromResult(hasOverlap);
     }
 
-    public Booking Create(Booking booking)
+    public Task<bool> TryCreateAsync(Booking booking, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (_bookings.Any(existingBooking =>
+                existingBooking.RoomId == booking.RoomId &&
+                booking.Start < existingBooking.End &&
+                existingBooking.Start < booking.End))
+        {
+            return Task.FromResult(false);
+        }
+
         _bookings.Add(booking);
-        return booking;
+        return Task.FromResult(true);
     }
 
-    public Booking Update(Booking booking)
+    public Task<bool> TryUpdateAsync(Booking booking, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (_bookings.Any(existingBooking =>
+                existingBooking.RoomId == booking.RoomId &&
+                existingBooking.Id != booking.Id &&
+                booking.Start < existingBooking.End &&
+                existingBooking.Start < booking.End))
+        {
+            return Task.FromResult(false);
+        }
+
         var index = _bookings.FindIndex(existingBooking => existingBooking.Id == booking.Id);
         if (index < 0)
         {
@@ -38,11 +71,12 @@ public sealed class InMemoryBookingRepository : IBookingRepository
         }
 
         _bookings[index] = booking;
-        return booking;
+        return Task.FromResult(true);
     }
 
-    public bool Delete(Guid id)
+    public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        return _bookings.RemoveAll(booking => booking.Id == id) > 0;
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(_bookings.RemoveAll(booking => booking.Id == id) > 0);
     }
 }

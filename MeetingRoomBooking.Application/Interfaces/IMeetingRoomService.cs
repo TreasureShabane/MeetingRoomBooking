@@ -4,6 +4,6 @@ namespace MeetingRoomBooking.Application.Interfaces;
 
 public interface IMeetingRoomService
 {
-    IReadOnlyCollection<MeetingRoomDto> GetAllRooms();
-    MeetingRoomDto? GetRoom(Guid id);
+    Task<IReadOnlyCollection<MeetingRoomDto>> GetAllRoomsAsync(CancellationToken cancellationToken);
+    Task<MeetingRoomDto?> GetRoomAsync(Guid id, CancellationToken cancellationToken);
 }

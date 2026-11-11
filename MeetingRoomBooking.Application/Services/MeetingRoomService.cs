@@ -1,34 +1,22 @@
 using MeetingRoomBooking.Application.Dtos;
 using MeetingRoomBooking.Application.Interfaces;
-using MeetingRoomBooking.Domain.Entities;
 
 namespace MeetingRoomBooking.Application.Services;
 
-public sealed class MeetingRoomService : IMeetingRoomService
+public sealed class MeetingRoomService(IMeetingRoomRepository meetingRoomRepository) : IMeetingRoomService
 {
-    private readonly IMeetingRoomRepository _meetingRoomRepository;
-
-    public MeetingRoomService(IMeetingRoomRepository meetingRoomRepository)
+    public async Task<IReadOnlyCollection<MeetingRoomDto>> GetAllRoomsAsync(CancellationToken cancellationToken)
     {
-        _meetingRoomRepository = meetingRoomRepository;
-    }
-
-    public IReadOnlyCollection<MeetingRoomDto> GetAllRooms()
-    {
-        return _meetingRoomRepository.GetAll()
+        var rooms = await meetingRoomRepository.GetAllAsync(cancellationToken);
+        return rooms
             .OrderBy(room => room.Name)
-            .Select(Map)
-            .ToList();
+            .Select(room => new MeetingRoomDto(room.Id, room.Name, room.Capacity))
+            .ToArray();
     }
 
-    public MeetingRoomDto? GetRoom(Guid id)
+    public async Task<MeetingRoomDto?> GetRoomAsync(Guid id, CancellationToken cancellationToken)
     {
-        var room = _meetingRoomRepository.GetById(id);
-        return room is null ? null : Map(room);
-    }
-
-    private static MeetingRoomDto Map(MeetingRoom room)
-    {
-        return new MeetingRoomDto(room.Id, room.Name, room.Capacity);
+        var room = await meetingRoomRepository.GetByIdAsync(id, cancellationToken);
+        return room is null ? null : new MeetingRoomDto(room.Id, room.Name, room.Capacity);
     }
 }

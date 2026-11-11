@@ -1,92 +1,77 @@
-# MeetingRoomBooking API
+# Meeting Room Booking
 
-A .NET backend for managing meeting room bookings in a small office environment. The project is intentionally focused on the API layer and follows a layered design so the business logic remains independent from the web layer and in-memory data access.
+A full-stack meeting room booking application with a Vue 3 client and an ASP.NET Core API. The frontend uses the API for all room and booking data; SQLite provides persistent local storage.
 
-## Architecture
+## Solution structure
 
-The solution is structured into four clear layers:
-
-- `MeetingRoomBooking.Api` – ASP.NET Core controllers and HTTP endpoints.
-- `MeetingRoomBooking.Application` – application contracts, DTOs, service logic, and validation rules.
-- `MeetingRoomBooking.Domain` – core entities such as meeting rooms and bookings.
-- `MeetingRoomBooking.Infrastructure` – in-memory repositories and seeded sample data.
-
-This keeps the API thin, makes validation logic reusable, and allows the data source or front-end client to change without rewriting the booking rules.
+- `MeetingRoomBooking.Api` - HTTP controllers, OpenAPI, Scalar API reference, CORS, and SQLite startup.
+- `MeetingRoomBooking.Application` - DTOs, service contracts, validation, and booking rules.
+- `MeetingRoomBooking.Domain` - booking and meeting room entities.
+- `MeetingRoomBooking.Infrastructure` - SQLite/EF Core persistence, repositories, and seeded rooms.
+- `MeetingRoomBooking.Tests` - booking behavior and SQLite persistence tests.
+- `MeetingRoomBooking-UI/frontend` - Vue 3, TypeScript, Pinia, and Zod client.
 
 ## Features
 
-- Seeded meeting rooms with capacity details.
-- View all rooms and room-specific schedules.
-- Create, update, and delete bookings.
-- Prevent overlapping bookings for the same room.
-- Validate required fields and time ranges before accepting requests.
-- Return clear validation feedback in API responses.
+- Lists seeded meeting rooms and existing bookings from the API.
+- Creates and edits bookings with frontend and backend validation.
+- Prevents overlapping bookings for the same room.
+- Cancels bookings with a confirmation and success message.
+- Displays clear loading and validation states, plus accessible notifications for successful or failed actions.
+- Uses SQLite at `MeetingRoomBooking.Api/App_Data/meeting-room-booking.db`; the database is created on first API startup and is excluded from Git.
 
-## API Endpoints
+Rooms are seeded when the database is first created. Booking data persists across API restarts. The app uses `EnsureCreated` to keep local setup simple; schema changes require recreating the local database until migrations are introduced.
 
-The API exposes OpenAPI metadata and can be explored at `/openapi/v1.json` while the app is running.
+## Run locally
+
+Install the .NET 10 SDK and Node.js 22.18+.
+
+Start the API from the solution root:
+
+```powershell
+dotnet restore
+dotnet run --project MeetingRoomBooking.Api --launch-profile http
+```
+
+In Development, the API listens over HTTP at `http://localhost:5108` so the Vite client can call it without an HTTPS redirect. Interactive API documentation is available at [http://localhost:5108/scalar/v1](http://localhost:5108/scalar/v1), and the OpenAPI document is at [http://localhost:5108/openapi/v1.json](http://localhost:5108/openapi/v1.json). HTTPS redirection remains enabled outside Development.
+
+In another terminal, start the Vue client:
+
+```powershell
+Set-Location MeetingRoomBooking-UI/frontend
+npm install
+npm run dev
+```
+
+Open the Vite URL printed in the terminal (normally `http://localhost:5173`). The API permits that development origin. To use another API URL, set `VITE_API_BASE_URL` to the API base URL, including `/api`, before starting or building the frontend.
+
+## API endpoints
 
 ### Rooms
 
-- `GET /api/rooms` – list all rooms
-- `GET /api/rooms/{id}` – get one room by id
+- `GET /api/rooms` - list rooms
+- `GET /api/rooms/{id}` - get one room
 
 ### Bookings
 
-- `GET /api/bookings` – list all bookings or filter by room with `?roomId={id}`
-- `GET /api/bookings/{id}` – get one booking by id
-- `POST /api/bookings` – create a booking
-- `PUT /api/bookings/{id}` – update a booking
-- `DELETE /api/bookings/{id}` – cancel/delete a booking
+- `GET /api/bookings` - list bookings
+- `GET /api/bookings?roomId={id}` - list bookings for a room
+- `GET /api/bookings/{id}` - get one booking
+- `POST /api/bookings` - create a booking (`201 Created`)
+- `PUT /api/bookings/{id}` - update a booking
+- `DELETE /api/bookings/{id}` - cancel a booking (`204 No Content`)
 
-## Example Request
+Invalid booking data returns a structured `400` Problem Details response. A room-time conflict returns `409`, and missing resources return `404`.
 
-```http
-POST https://localhost:5001/api/bookings
-Content-Type: application/json
+## Run tests
 
-{
-  "roomId": "11111111-1111-1111-1111-111111111111",
-  "title": "Design review",
-  "start": "2026-11-11T09:00:00Z",
-  "end": "2026-11-11T10:00:00Z"
-}
+```powershell
+dotnet test MeetingRoomBooking.slnx
 ```
 
-## Validation Rules
+## Scope and assumptions
 
-The backend rejects requests when:
-
-- the room does not exist
-- the title is empty
-- the start time is missing or invalid
-- the end time is missing or invalid
-- the end time is not after the start time
-- another booking overlaps in the same room
-
-## Getting Started
-
-1. Ensure the .NET SDK is installed.
-2. Restore dependencies:
-
-```bash
-dotnet restore
-```
-
-3. Run the API:
-
-```bash
-dotnet run --project MeetingRoomBooking.Api
-```
-
-4. Open the API documentation in a browser via the generated OpenAPI endpoint, or call the API using HTTP tooling.
-
-## Running the Tests
-
-```bash
-dotnet test MeetingRoomBooking.slnx --nologo
-```
-
-## Notes
-
-This repository currently focuses on the backend API for the booking workflow, in line with the assessment requirements. The frontend layer is intentionally not included in this iteration so the API remains independent, testable, and reusable for a future Vue client.
+- Authentication, recurring meetings, attendee management, email notifications, and realtime updates are not included.
+- Cancellation is implemented as deletion.
+- Room data is seeded; there is no room administration interface.
+- The frontend is a separate client and communicates with the API over HTTP.

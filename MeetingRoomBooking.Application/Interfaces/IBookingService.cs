@@ -4,10 +4,10 @@ namespace MeetingRoomBooking.Application.Interfaces;
 
 public interface IBookingService
 {
-    IReadOnlyCollection<BookingDto> GetAllBookings();
-    IReadOnlyCollection<BookingDto> GetBookingsForRoom(Guid roomId);
-    BookingDto? GetBooking(Guid id);
-    BookingDto CreateBooking(CreateBookingRequest request);
-    BookingDto UpdateBooking(Guid id, UpdateBookingRequest request);
-    void DeleteBooking(Guid id);
+    Task<IReadOnlyCollection<BookingDto>> GetAllBookingsAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<BookingDto>> GetBookingsForRoomAsync(Guid roomId, CancellationToken cancellationToken);
+    Task<BookingDto?> GetBookingAsync(Guid id, CancellationToken cancellationToken);
+    Task<BookingDto> CreateBookingAsync(CreateBookingRequest request, CancellationToken cancellationToken);
+    Task<BookingDto> UpdateBookingAsync(Guid id, UpdateBookingRequest request, CancellationToken cancellationToken);
+    Task DeleteBookingAsync(Guid id, CancellationToken cancellationToken);
 }

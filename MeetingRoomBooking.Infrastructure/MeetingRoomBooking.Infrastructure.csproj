@@ -11,4 +11,8 @@
     <ProjectReference Include="..\MeetingRoomBooking.Domain\MeetingRoomBooking.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.14" />
+  </ItemGroup>
+
 </Project>

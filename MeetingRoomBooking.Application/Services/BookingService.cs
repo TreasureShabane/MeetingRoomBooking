@@ -5,44 +5,43 @@ using MeetingRoomBooking.Domain.Entities;
 
 namespace MeetingRoomBooking.Application.Services;
 
-public sealed class BookingService : IBookingService
+public sealed class BookingService(
+    IBookingRepository bookingRepository,
+    IMeetingRoomRepository meetingRoomRepository) : IBookingService
 {
-    private readonly IBookingRepository _bookingRepository;
-    private readonly IMeetingRoomRepository _meetingRoomRepository;
-
-    public BookingService(IBookingRepository bookingRepository, IMeetingRoomRepository meetingRoomRepository)
+    public async Task<IReadOnlyCollection<BookingDto>> GetAllBookingsAsync(CancellationToken cancellationToken)
     {
-        _bookingRepository = bookingRepository;
-        _meetingRoomRepository = meetingRoomRepository;
+        var bookings = await bookingRepository.GetAllAsync(cancellationToken);
+        var rooms = await meetingRoomRepository.GetAllAsync(cancellationToken);
+        return MapBookings(bookings, rooms);
     }
 
-    public IReadOnlyCollection<BookingDto> GetAllBookings()
+    public async Task<IReadOnlyCollection<BookingDto>> GetBookingsForRoomAsync(
+        Guid roomId,
+        CancellationToken cancellationToken)
     {
-        return MapBookings(_bookingRepository.GetAll());
+        var bookings = await bookingRepository.GetAllAsync(cancellationToken);
+        var rooms = await meetingRoomRepository.GetAllAsync(cancellationToken);
+        return MapBookings(bookings.Where(booking => booking.RoomId == roomId), rooms);
     }
 
-    public IReadOnlyCollection<BookingDto> GetBookingsForRoom(Guid roomId)
+    public async Task<BookingDto?> GetBookingAsync(Guid id, CancellationToken cancellationToken)
     {
-        return MapBookings(_bookingRepository.GetAll().Where(booking => booking.RoomId == roomId));
-    }
-
-    public BookingDto? GetBooking(Guid id)
-    {
-        var booking = _bookingRepository.GetById(id);
+        var booking = await bookingRepository.GetByIdAsync(id, cancellationToken);
         if (booking is null)
         {
             return null;
         }
 
-        var room = _meetingRoomRepository.GetById(booking.RoomId);
+        var room = await meetingRoomRepository.GetByIdAsync(booking.RoomId, cancellationToken);
         return room is null ? null : Map(booking, room);
     }
 
-    public BookingDto CreateBooking(CreateBookingRequest request)
+    public async Task<BookingDto> CreateBookingAsync(
+        CreateBookingRequest request,
+        CancellationToken cancellationToken)
     {
-        Validate(request.RoomId, request.Title, request.Start, request.End, null);
-
-        var room = GetRequiredRoom(request.RoomId);
+        var room = await ValidateAsync(request.RoomId, request.Title, request.Start, request.End, null, cancellationToken);
         var booking = new Booking
         {
             Id = Guid.NewGuid(),
@@ -52,18 +51,30 @@ public sealed class BookingService : IBookingService
             End = request.End
         };
 
-        var created = _bookingRepository.Create(booking);
-        return Map(created, room);
+        var created = await bookingRepository.TryCreateAsync(booking, cancellationToken);
+        if (!created)
+        {
+            throw new BookingConflictException("The room is already booked during this time.");
+        }
+
+        return Map(booking, room);
     }
 
-    public BookingDto UpdateBooking(Guid id, UpdateBookingRequest request)
+    public async Task<BookingDto> UpdateBookingAsync(
+        Guid id,
+        UpdateBookingRequest request,
+        CancellationToken cancellationToken)
     {
-        var existingBooking = _bookingRepository.GetById(id)
+        var existingBooking = await bookingRepository.GetByIdAsync(id, cancellationToken)
             ?? throw new KeyNotFoundException($"Booking with id '{id}' was not found.");
 
-        Validate(request.RoomId, request.Title, request.Start, request.End, id);
-
-        var room = GetRequiredRoom(request.RoomId);
+        var room = await ValidateAsync(
+            request.RoomId,
+            request.Title,
+            request.Start,
+            request.End,
+            id,
+            cancellationToken);
 
         var updatedBooking = new Booking
         {
@@ -74,23 +85,33 @@ public sealed class BookingService : IBookingService
             End = request.End
         };
 
-        var savedBooking = _bookingRepository.Update(updatedBooking);
-        return Map(savedBooking, room);
+        var updated = await bookingRepository.TryUpdateAsync(updatedBooking, cancellationToken);
+        if (!updated)
+        {
+            throw new BookingConflictException("The room is already booked during this time.");
+        }
+
+        return Map(updatedBooking, room);
     }
 
-    public void DeleteBooking(Guid id)
+    public async Task DeleteBookingAsync(Guid id, CancellationToken cancellationToken)
     {
-        var deleted = _bookingRepository.Delete(id);
+        var deleted = await bookingRepository.DeleteAsync(id, cancellationToken);
         if (!deleted)
         {
             throw new KeyNotFoundException($"Booking with id '{id}' was not found.");
         }
     }
 
-    private void Validate(Guid roomId, string title, DateTimeOffset start, DateTimeOffset end, Guid? currentBookingId)
+    private async Task<MeetingRoom> ValidateAsync(
+        Guid roomId,
+        string title,
+        DateTimeOffset start,
+        DateTimeOffset end,
+        Guid? currentBookingId,
+        CancellationToken cancellationToken)
     {
         var errors = new List<string>();
-
         if (roomId == Guid.Empty)
         {
             errors.Add("A meeting room must be selected.");
@@ -99,6 +120,10 @@ public sealed class BookingService : IBookingService
         if (string.IsNullOrWhiteSpace(title))
         {
             errors.Add("Booking title is required.");
+        }
+        else if (title.Trim().Length > 120)
+        {
+            errors.Add("Booking title cannot exceed 120 characters.");
         }
 
         if (start == default)
@@ -116,56 +141,43 @@ public sealed class BookingService : IBookingService
             errors.Add("Start time must be before end time.");
         }
 
-        if (roomId != Guid.Empty && _meetingRoomRepository.GetById(roomId) is null)
+        var room = roomId == Guid.Empty
+            ? null
+            : await meetingRoomRepository.GetByIdAsync(roomId, cancellationToken);
+        if (roomId != Guid.Empty && room is null)
         {
             errors.Add("The selected room does not exist.");
-        }
-
-        if (roomId != Guid.Empty)
-        {
-            var hasConflict = _bookingRepository.GetAll().Any(booking =>
-                booking.RoomId == roomId &&
-                booking.Id != currentBookingId &&
-                start < booking.End &&
-                booking.Start < end);
-
-            if (hasConflict)
-            {
-                errors.Add("The room is already booked during this time.");
-            }
         }
 
         if (errors.Count > 0)
         {
             throw new BookingValidationException(errors);
         }
-    }
 
-    private MeetingRoom GetRequiredRoom(Guid roomId)
-    {
-        var room = _meetingRoomRepository.GetById(roomId);
-        if (room is null)
+        var hasConflict = await bookingRepository.HasOverlapAsync(
+            roomId,
+            start,
+            end,
+            currentBookingId,
+            cancellationToken);
+        if (hasConflict)
         {
-            throw new BookingValidationException(["The selected room does not exist."]);
+            throw new BookingConflictException("The room is already booked during this time.");
         }
 
-        return room;
+        return room ?? throw new BookingValidationException(["The selected room does not exist."]);
     }
 
-    private IReadOnlyCollection<BookingDto> MapBookings(IEnumerable<Booking> bookings)
+    private static IReadOnlyCollection<BookingDto> MapBookings(
+        IEnumerable<Booking> bookings,
+        IEnumerable<MeetingRoom> rooms)
     {
-        var mappedBookings = new List<BookingDto>();
-
-        foreach (var booking in bookings.OrderBy(item => item.Start))
-        {
-            var room = _meetingRoomRepository.GetById(booking.RoomId);
-            if (room is not null)
-            {
-                mappedBookings.Add(Map(booking, room));
-            }
-        }
-
-        return mappedBookings;
+        var roomsById = rooms.ToDictionary(room => room.Id);
+        return bookings
+            .OrderBy(booking => booking.Start)
+            .Where(booking => roomsById.ContainsKey(booking.RoomId))
+            .Select(booking => Map(booking, roomsById[booking.RoomId]))
+            .ToArray();
     }
 
     private static BookingDto Map(Booking booking, MeetingRoom room)

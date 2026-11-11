@@ -8,121 +8,122 @@ namespace MeetingRoomBooking.Tests;
 public class BookingServiceTests
 {
     [Fact]
-    public void CreateBooking_WithValidRequest_Succeeds()
+    public async Task CreateBooking_WithValidRequest_Succeeds()
     {
-        var roomRepository = new InMemoryMeetingRoomRepository();
-        var bookingRepository = new InMemoryBookingRepository();
-        var service = new BookingService(bookingRepository, roomRepository);
-
-        var baseDate = DateTimeOffset.UtcNow.Date.AddDays(30);
+        var service = CreateService();
         var request = new CreateBookingRequest(
-            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            RoomId,
             "Design Review",
-            baseDate.AddHours(15),
-            baseDate.AddHours(16));
+            FutureDate.AddHours(15),
+            FutureDate.AddHours(16));
 
-        var booking = service.CreateBooking(request);
+        var booking = await service.CreateBookingAsync(request, CancellationToken.None);
 
         Assert.Equal("Design Review", booking.Title);
         Assert.Equal(request.RoomId, booking.RoomId);
     }
 
     [Fact]
-    public void CreateBooking_WhenRoomIsAlreadyBooked_ThrowsValidationException()
+    public async Task CreateBooking_WhenRoomIsAlreadyBooked_ThrowsConflictException()
     {
-        var roomRepository = new InMemoryMeetingRoomRepository();
-        var bookingRepository = new InMemoryBookingRepository();
-        var service = new BookingService(bookingRepository, roomRepository);
+        var service = CreateService();
+        var start = FutureDate.AddHours(9);
+        var end = start.AddHours(1);
 
-        var baseDate = DateTimeOffset.UtcNow.Date.AddDays(30);
-        var firstStart = baseDate.AddHours(9);
-        var firstEnd = firstStart.AddHours(1);
+        await service.CreateBookingAsync(
+            new CreateBookingRequest(RoomId, "First Booking", start, end),
+            CancellationToken.None);
 
-        service.CreateBooking(new CreateBookingRequest(
-            Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            "First Booking",
-            firstStart,
-            firstEnd));
-
-        var second = new CreateBookingRequest(
-            Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            "Conflict Booking",
-            firstStart.AddMinutes(30),
-            firstEnd.AddMinutes(30));
-
-        var exception = Assert.Throws<BookingValidationException>(() => service.CreateBooking(second));
+        var exception = await Assert.ThrowsAsync<BookingConflictException>(() =>
+            service.CreateBookingAsync(
+                new CreateBookingRequest(RoomId, "Conflict Booking", start.AddMinutes(30), end.AddMinutes(30)),
+                CancellationToken.None));
 
         Assert.Contains("already booked", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public void CreateBooking_WhenEndBeforeStart_ThrowsValidationException()
+    public async Task CreateBooking_WhenEndBeforeStart_ThrowsValidationException()
     {
-        var roomRepository = new InMemoryMeetingRoomRepository();
-        var bookingRepository = new InMemoryBookingRepository();
-        var service = new BookingService(bookingRepository, roomRepository);
-
-        var baseDate = DateTimeOffset.UtcNow.Date.AddDays(30);
+        var service = CreateService();
         var request = new CreateBookingRequest(
-            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            RoomId,
             "Invalid booking",
-            baseDate.AddHours(10),
-            baseDate.AddHours(9));
+            FutureDate.AddHours(10),
+            FutureDate.AddHours(9));
 
-        var exception = Assert.Throws<BookingValidationException>(() => service.CreateBooking(request));
+        var exception = await Assert.ThrowsAsync<BookingValidationException>(() =>
+            service.CreateBookingAsync(request, CancellationToken.None));
 
         Assert.Contains("before end time", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public void UpdateBooking_WhenBookingBecomesInvalid_ThrowsValidationException()
+    public async Task UpdateBooking_WhenBookingBecomesInvalid_ThrowsConflictException()
     {
-        var roomRepository = new InMemoryMeetingRoomRepository();
-        var bookingRepository = new InMemoryBookingRepository();
-        var service = new BookingService(bookingRepository, roomRepository);
-
-        var baseDate = DateTimeOffset.UtcNow.Date.AddDays(30);
-
-        var original = service.CreateBooking(new CreateBookingRequest(
-            Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            "Original Meeting",
-            baseDate.AddHours(11),
-            baseDate.AddHours(12)));
-
-        var conflictingStart = baseDate.AddHours(13);
+        var service = CreateService();
+        var original = await service.CreateBookingAsync(
+            new CreateBookingRequest(RoomId, "Original Meeting", FutureDate.AddHours(11), FutureDate.AddHours(12)),
+            CancellationToken.None);
+        var conflictingStart = FutureDate.AddHours(13);
         var conflictingEnd = conflictingStart.AddHours(1);
-        service.CreateBooking(new CreateBookingRequest(
-            Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            "Conflicting Meeting",
-            conflictingStart,
-            conflictingEnd));
 
-        var update = new UpdateBookingRequest(
-            Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            "Original Meeting Changed",
-            conflictingStart,
-            conflictingEnd);
+        await service.CreateBookingAsync(
+            new CreateBookingRequest(RoomId, "Conflicting Meeting", conflictingStart, conflictingEnd),
+            CancellationToken.None);
 
-        var exception = Assert.Throws<BookingValidationException>(() => service.UpdateBooking(original.Id, update));
+        var update = new UpdateBookingRequest(RoomId, "Original Meeting Changed", conflictingStart, conflictingEnd);
+        var exception = await Assert.ThrowsAsync<BookingConflictException>(() =>
+            service.UpdateBookingAsync(original.Id, update, CancellationToken.None));
 
         Assert.Contains("already booked", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public void DeleteBooking_WhenBookingExists_RemovesBooking()
+    public async Task UpdateBooking_WithValidChanges_UpdatesTheExistingBooking()
     {
-        var roomRepository = new InMemoryMeetingRoomRepository();
-        var bookingRepository = new InMemoryBookingRepository();
-        var service = new BookingService(bookingRepository, roomRepository);
+        var service = CreateService();
+        var original = await service.CreateBookingAsync(
+            new CreateBookingRequest(RoomId, "Original Meeting", FutureDate.AddHours(11), FutureDate.AddHours(12)),
+            CancellationToken.None);
+        var updatedStart = FutureDate.AddHours(14);
+        var updatedEnd = updatedStart.AddHours(1);
 
-        var created = service.CreateBooking(new CreateBookingRequest(
-            Guid.Parse("22222222-2222-2222-2222-222222222222"),
-            "Room cleanup",
-            DateTimeOffset.UtcNow.Date.AddDays(40).AddHours(14),
-            DateTimeOffset.UtcNow.Date.AddDays(40).AddHours(15)));
+        var updated = await service.UpdateBookingAsync(
+            original.Id,
+            new UpdateBookingRequest(SecondRoomId, "Updated Meeting", updatedStart, updatedEnd),
+            CancellationToken.None);
 
-        service.DeleteBooking(created.Id);
-
-        Assert.Null(service.GetBooking(created.Id));
+        Assert.Equal(original.Id, updated.Id);
+        Assert.Equal(SecondRoomId, updated.RoomId);
+        Assert.Equal("Updated Meeting", updated.Title);
+        Assert.Equal(updatedStart, updated.Start);
+        Assert.Equal(updatedEnd, updated.End);
     }
+
+    [Fact]
+    public async Task DeleteBooking_WhenBookingExists_RemovesBooking()
+    {
+        var service = CreateService();
+        var created = await service.CreateBookingAsync(
+            new CreateBookingRequest(
+                SecondRoomId,
+                "Room cleanup",
+                FutureDate.AddHours(14),
+                FutureDate.AddHours(15)),
+            CancellationToken.None);
+
+        await service.DeleteBookingAsync(created.Id, CancellationToken.None);
+
+        Assert.Null(await service.GetBookingAsync(created.Id, CancellationToken.None));
+    }
+
+    private static BookingService CreateService()
+    {
+        return new BookingService(new InMemoryBookingRepository(), new InMemoryMeetingRoomRepository());
+    }
+
+    private static readonly Guid RoomId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    private static readonly Guid SecondRoomId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+    private static readonly DateTimeOffset FutureDate = DateTimeOffset.UtcNow.Date.AddDays(30);
 }

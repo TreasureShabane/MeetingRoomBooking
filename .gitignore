@@ -5,9 +5,14 @@
 /.vs
 /bin/
 /obj/
+**/bin/
+**/obj/
 *.user
 *.suo
 *.cache
 *.pdb
 *.dll
+**/node_modules/
+**/dist/
+**/App_Data/*.db*
 
