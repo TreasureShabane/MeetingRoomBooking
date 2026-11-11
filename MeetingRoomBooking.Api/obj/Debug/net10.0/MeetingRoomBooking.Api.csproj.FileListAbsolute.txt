@@ -38,3 +38,4 @@ C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Api\
 C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Api\obj\Debug\net10.0\MeetingRoomBooking.Api.pdb
 C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Api\obj\Debug\net10.0\MeetingRoomBooking.Api.genruntimeconfig.cache
 C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Api\obj\Debug\net10.0\ref\MeetingRoomBooking.Api.dll
+C:\Users\treasureshabane\source\repos\MeetingRoomBooking\MeetingRoomBooking.Api\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
